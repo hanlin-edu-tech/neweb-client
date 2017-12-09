@@ -5,9 +5,9 @@ import com.eHanlin.api.cashflow.client.neweb.api.CashSystemFrontEndPayment.Payme
 import com.eHanlin.api.cashflow.client.neweb.api.CashSystemFrontEndQuery;
 import com.eHanlin.api.cashflow.client.neweb.api.CashSystemFrontEndQuery.Operation;
 import com.eHanlin.api.cashflow.client.neweb.api.NewebAPI;
+import com.eHanlin.api.cashflow.client.neweb.crypto.NewebOtherPaymentCrypto;
 import com.eHanlin.api.cashflow.client.neweb.response.NewebPaymentResponse;
 import com.eHanlin.api.cashflow.client.neweb.response.NewebQueryResponse;
-import com.eHanlin.api.cashflow.client.neweb.util.NewebCrypto;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,7 +24,7 @@ public class NewebCashSystemFrontEnd {
 
     private final String code;
 
-    private final NewebCrypto crypto;
+    private final NewebOtherPaymentCrypto crypto;
 
     private final HttpInvoker http;
 
@@ -34,8 +34,15 @@ public class NewebCashSystemFrontEnd {
         this.endpoint = endpoint;
         this.merchantNumber = merchantNumber;
         this.code = code;
-        this.crypto = new NewebCrypto(merchantNumber, code);
+        this.crypto = new NewebOtherPaymentCrypto(merchantNumber, code);
         this.http = new HttpInvoker();
+    }
+
+    /**
+     * 取得專用加密工具
+     */
+    public NewebOtherPaymentCrypto getCrypto() {
+        return crypto;
     }
 
     /**
@@ -65,7 +72,7 @@ public class NewebCashSystemFrontEnd {
             .setPaymentType(paymentType)
             .setOrderNumber(orderNumber)
             .setAmount(amount)
-            .setHash(crypto.otherPayment(amount, orderNumber));
+            .setHash(crypto.hash(amount, orderNumber));
 
         if (due == null) {
             api.setDuedate(DEFAULT_DUE_DAYS);
