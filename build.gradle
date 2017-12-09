@@ -1,0 +1,57 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6"
+    }
+}
+
+apply plugin: "groovy"
+apply plugin: "maven-publish"
+apply plugin: "com.jfrog.bintray"
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
+
+group = "com.eHanlin.api"
+version = "0.1.0"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.squareup.okhttp3:okhttp:3.9.0'
+    compile "commons-codec:commons-codec:1.11"
+    testCompile "org.codehaus.groovy:groovy-all:2.4.10"
+    testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
+    testCompile 'net.bytebuddy:byte-buddy:1.7.5'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+bintray {
+    user = bintray_user
+    key = bintray_api_key
+
+    publications = ["mavenJava"]
+    publish = true
+    pkg {
+        repo = "maven"
+        name = "neweb-client"
+        userOrg = "ehanlin"
+        desc = "eHanlin neweb client"
+        vcsUrl = "https://github.com/eHanlin/neweb-client"
+        licenses = ["Apache-2.0"]
+        publicDownloadNumbers = true
+    }
+}
+
