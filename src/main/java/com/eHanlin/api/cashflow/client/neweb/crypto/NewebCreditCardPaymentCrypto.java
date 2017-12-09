@@ -56,10 +56,8 @@ public class NewebCreditCardPaymentCrypto {
     /**
      * 藍新信用卡交易，第一階段交易結果(feedback)判斷式
      * @param data
-     * @param salt
-     * @return
      */
-    public boolean isFeedbackCredible(Map<String, String> data, String salt) {
+    public boolean isFeedbackCredible(Map<String, String> data) {
         String feedbackOrderNumber = data.get("OrderNumber");
         String feedbackPRC = data.get("PRC");
         String feedbackSRC = data.get("SRC");
