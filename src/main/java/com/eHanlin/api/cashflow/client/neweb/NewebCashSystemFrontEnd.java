@@ -28,7 +28,7 @@ public class NewebCashSystemFrontEnd {
 
     private final HttpInvoker http;
 
-    private static final Integer DEFAULT_DUE_DATE = 5;
+    public static final Integer DEFAULT_DUE_DAYS = 5;
 
     public NewebCashSystemFrontEnd(String endpoint, String merchantNumber, String code) {
         this.endpoint = endpoint;
@@ -43,8 +43,8 @@ public class NewebCashSystemFrontEnd {
      * @param orderNumber
      * @param amount
      */
-    public NewebPaymentResponse atm(Long orderNumber, Integer amount) {
-        return payment(PaymentType.ATM, orderNumber, amount);
+    public NewebPaymentResponse atm(Long orderNumber, Integer amount, Date due) {
+        return payment(PaymentType.ATM, orderNumber, amount, due);
     }
 
     /**
@@ -52,22 +52,31 @@ public class NewebCashSystemFrontEnd {
      * @param orderNumber
      * @param amount
      */
-    public NewebPaymentResponse mmk(Long orderNumber, Integer amount) {
-        return payment(PaymentType.MMK, orderNumber, amount);
+    public NewebPaymentResponse mmk(Long orderNumber, Integer amount, Date due) {
+        return payment(PaymentType.MMK, orderNumber, amount, due);
     }
 
     /**
      * 藍新金流請求建立付款訂單
      */
-    public NewebPaymentResponse payment(PaymentType paymentType, Long orderNumber, Integer amount) {
+    public NewebPaymentResponse payment(PaymentType paymentType, Long orderNumber, Integer amount, Date due) {
         CashSystemFrontEndPayment api = new CashSystemFrontEndPayment()
             .setMerchantNumber(merchantNumber)
             .setPaymentType(paymentType)
             .setOrderNumber(orderNumber)
             .setAmount(amount)
-            .setDuedate(DEFAULT_DUE_DATE)
             .setHash(crypto.otherPayment(amount, orderNumber));
 
+        if (due == null) {
+            api.setDuedate(DEFAULT_DUE_DAYS);
+        } else {
+            api.setDuedate(due);
+        }
+
+        return payment(api);
+    }
+
+    public NewebPaymentResponse payment(CashSystemFrontEndPayment api) {
         return new NewebPaymentResponse(call(api));
     }
 
@@ -75,18 +84,21 @@ public class NewebCashSystemFrontEnd {
      * 藍新金流訂單查詢
      * @param paymentType
      * @param orderNumber
-     * @return
      */
     public NewebQueryResponse query(PaymentType paymentType, Long orderNumber) {
         String time = new SimpleDateFormat(CashSystemFrontEndQuery.TIME_FORMAT).format(new Date());
         CashSystemFrontEndQuery api = new CashSystemFrontEndQuery()
-                .setMerchantNumber(merchantNumber)
-                .setPaymentType(paymentType)
-                .setOrderNumber(orderNumber)
-                .setOperation(Operation.queryorders)
-                .setTime(time)
-                .setHash(crypto.query(time));
+            .setMerchantNumber(merchantNumber)
+            .setPaymentType(paymentType)
+            .setOrderNumber(orderNumber)
+            .setOperation(Operation.queryorders)
+            .setTime(time)
+            .setHash(crypto.query(time));
 
+        return query(api);
+    }
+
+    public NewebQueryResponse query(CashSystemFrontEndQuery api) {
         return new NewebQueryResponse(call(api));
     }
 
